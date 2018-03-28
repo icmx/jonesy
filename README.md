@@ -35,7 +35,7 @@ In classical way reader application connects to original feed URL — http://www
 
 You can also run Jonesy on external host, e.g. on home server — in that case you'll need to replace 127.0.0.1 by external address, e.g. http://example.org:8600/jonesyfeeds/reddit.feed.
 
-## Automatic Updates
+### Automatic Updates
 
 Jonesy is unable to update local feeds automatically, so you have to do that manually or set up a recurrent job by at, Cron, systemd or other suitable for your system. That job should execute jonesy-fetch from time to time in a way you like it.
 
@@ -57,12 +57,12 @@ This URL provides a single-entry feed which should be placed at the top of exter
   - `$JONESY_HOST` — host address on which Jonesy will accept requests. Default is `127.0.0.1`.
   - `$JONESY_PORT` — port on which Jonesy will accept requests. Default is `8600`.
 
-## Files and Directories
+### Files and Directories
 
   - `$JONESY_HOME/jonesyrc` — file for configuration and feeds list.
   - `$JONESY_HOME/jonesyfeeds` — directory for retrieved feeds files.
 
-### `jonesyrc` Syntax
+#### `jonesyrc` Syntax
 
 This is actually classic [curlrc](https://ec.haxx.se/cmdline-configfile.html) file, but for feeds list primarily. Its syntax is very simple:
 
@@ -85,3 +85,19 @@ One should define feeds by url/output pair, like so:
 ```
 
 In example above, `url` defines original feed URL and `output` defines local XML file which external reader application will access to. That is `output` feeds will be available at http://127.0.0.1/jonesyfeeds/ or http://example.org/jonesyfeeds/ for remote host.
+
+See also: [jonesyrc example](examples/jonesyrc).
+
+## Bugs and Issues
+
+Some webmasters forbids their sites for automatic crawlers, which makes Jonesy (as cURL user) unable to retrieve feeds. To avoid this, one should manually set a user agent, like so:
+
+```
+  user-agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:58.0) Gecko/20100101 Firefox/58.0"
+```
+
+Some feed URLs actually redirects to another location, which makes Jonesy unable to download them. To follow URL redirection, one should use `location` boolean option in jonesyrc:
+
+```
+  location
+```
