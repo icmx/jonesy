@@ -101,3 +101,8 @@ Some feed URLs actually redirects to another location, which makes Jonesy unable
 ```
   location
 ```
+
+## TODO
+
+  - [ ] Remove shell dependency
+  - [ ] Remove cURL dependency
