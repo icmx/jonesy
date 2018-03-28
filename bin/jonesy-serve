@@ -71,7 +71,7 @@ class CustomHandler(BaseHTTPRequestHandler):
                 data = file.read()
                 file.close()
             except:
-                self.send_headers_fail(400)
+                self.send_headers_fail()
             else:
                 self.send_headers_ok()
                 self.wfile.write(data)
