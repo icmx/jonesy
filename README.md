@@ -13,4 +13,4 @@ You need the following to use Jonesy:
   - Python 3 with standard libraries (no external dependencies required)
   - Latest version of Jonesy, of course! You can grab it by git or manually.
 
-You don't have to build something since Jonecy is just a couple of scripts — once obtained and configured, they're ready to go.
+You don't have to build something since Jonesy is just a couple of scripts — once obtained and configured, they're ready to go.
