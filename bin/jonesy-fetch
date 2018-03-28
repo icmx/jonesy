@@ -1,0 +1,6 @@
+#!/usr/bin/env sh
+
+JONESY_HOME="${JONESY_HOME:-$HOME/.jonesy}"
+
+cd "$JONESY_HOME/jonesyfeeds"
+curl --config "${JONESY_HOME}/jonesyrc"
