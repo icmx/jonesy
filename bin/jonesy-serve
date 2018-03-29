@@ -32,7 +32,7 @@ JONESY_FETCHFEED = """<?xml version="1.0" encoding="utf-8"?>
                 updated by jonesy-fetch at {isodate}.
             &lt;/p&gt;
             &lt;p&gt;
-                jonesy-fetch output:;
+                jonesy-fetch output:
             &lt;/p&gt;
             &lt;pre style=&#39;white-space:pre-wrap;&#39;&gt;{output}
             &lt;/pre&gt;
@@ -57,7 +57,7 @@ class CustomHandler(BaseHTTPRequestHandler):
 
         if (self.path == "/jonesyfetch"):
 
-            output   = subprocess.getoutput("./jonesy-fetch")
+            output   = subprocess.getoutput("jonesy-fetch")
             isodate  = datetime.datetime.utcnow().replace(
                 tzinfo=datetime.timezone.utc).isoformat()
             response = JONESY_FETCHFEED.format(
@@ -79,8 +79,8 @@ class CustomHandler(BaseHTTPRequestHandler):
 
 def run(host, port, server_class=HTTPServer, handler_class=CustomHandler):
     server_address = (host, port)
-    httpd = server_class(server_address, handler_class)
-    print("Starting Jonesy...")
+    httpd          = server_class(server_address, handler_class)
+    print("Starting Jonesy at http://{0}:{1} ...".format(host, port))
     print("Press Ctrl + C to cancel.")
     httpd.serve_forever()
 
