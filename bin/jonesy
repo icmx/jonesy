@@ -99,7 +99,55 @@ def do_mode_setup():
 
 
 def do_mode_serve():
-    print(None)
+    class CustomHTTPRequesHandler(BaseHTTPRequestHandler):
+
+        def send_headers_ok(self):
+            self.send_response(200)
+            self.send_header("Content-Type", "application/xml")
+            self.end_headers()
+
+        def send_headers_fail(self):
+            self.send_response(400)
+            self.end_headers()
+
+        def do_GET(self):
+
+            print("\tAccessing to path {0}".format(self.path))
+
+            if   self.path == "/":
+                print("")
+            elif self.path == "/config":
+                print("")
+            elif self.path == "/fetch":
+                output   = subprocess.getoutput("jonesy fetch")
+                isodate  = datetime.datetime.utcnow().replace(
+                    tzinfo=datetime.timezone.utc).isoformat()
+                response = JONESY_TEMPLATES_FETCHFEED.format(
+                    isodate=isodate, output=output)
+
+                self.send_headers_ok()
+                self.wfile.write(bytes(response, "utf-8"))
+            else:
+                try:
+                    file = open(os.path.realpath(
+                        JONESY_HOME + self.path), "rb"
+                    )
+                    data = file.read()
+                    file.close()
+                except:
+                    self.send_headers_fail()
+                else:
+                    self.send_headers_ok()
+                    self.wfile.write(data)
+
+    print("Starting Jonesy at http://{0}:{1} ...".format(
+        JONESY_HOST, JONESY_PORT
+    ))
+    print("Press Ctrl + C to cancel.")
+
+    server_address = (JONESY_HOST, int(JONESY_PORT))
+    httpd          = HTTPServer(server_address, CustomHTTPRequesHandler)
+    httpd.serve_forever()
 
 
 def do_mode_fetch():
@@ -113,6 +161,9 @@ def do_mode_fetch():
     for node in nodes:
         source_path = node.getAttribute("source")
         result_path = node.getAttribute("result")
+        print("Trying to update feed {0} ...".format(
+            source_path.replace("&", "&amp;")
+        ))
 
         url_request = urllib.request.Request(
             source_path,
@@ -121,12 +172,16 @@ def do_mode_fetch():
             }
         )
 
+        print("\tRequest ...")
         url_response = urllib.request.urlopen(url_request)
         data = url_response.read()
 
-        result_file = open(result_path, "wb")
+        print("\tSaving ...")
+        result_file = open(JONESY_HOME + "/feeds/" +result_path, "wb")
         result_file.write(data)
         result_file.close()
+
+        print("\tSaved successfull to {0}.".format(result_path))
 
 if __name__ == "__main__":
     main()
