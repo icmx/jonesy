@@ -87,7 +87,7 @@ Jonesy reads XML configuration in Muon format. Muon specs are currently in early
         <!-- and so on ... -->
       </feeds>
     </body>
-</muon>
+  </muon>
 ```
 
 **Note:** some feeds URLs contains ampersand characters **`&`**, for instance:
