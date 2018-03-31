@@ -1,0 +1,132 @@
+#!/usr/bin/env python3
+
+
+from http.server import BaseHTTPRequestHandler, HTTPServer
+import datetime
+import os
+import subprocess
+import sys
+import urllib.request
+import xml.dom.minidom
+
+
+HOME        = os.environ.get("HOME")
+
+JONESY_HOME = os.environ.get("JONESY_HOME", HOME + "/.jonesy")
+JONESY_HOST = os.environ.get("JONESY_HOST", "127.0.0.1")
+JONESY_PORT = os.environ.get("JONESY_PORT", "8600")
+
+JONESY_BUAS = os.environ.get(
+    "JONESY_USERAGENT",
+    "Mozilla/5.0 (X11; Linux x86_64; rv:52.7.3) Gecko/20100101 Firefox/\
+    52.7.3"
+)
+
+JONESY_TEMPLATES_FETCHFEED = """\
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+    <title>Jonesy Bumper Feed</title>
+    <subtitle>
+        This feed is a backup update trigger — if you access it, then
+        jonesy-serve will execute jonesy-fetch and update all your
+        feeds. It's better to use external schedulers however ­— such as
+        at, Cron or systemd service.
+    </subtitle>
+    <updated>{isodate}</updated>
+    <entry>
+        <title>Update started at {isodate}</title>
+        <updated>{isodate}</updated>
+        <content type="html">
+            &lt;p&gt;
+                If you can read this, then your local feeds are already
+                updated by jonesy-fetch at {isodate}.
+            &lt;/p&gt;
+            &lt;p&gt;
+                jonesy-fetch output:
+            &lt;/p&gt;
+            &lt;pre style=&#39;white-space:pre-wrap;&#39;&gt;{output}
+            &lt;/pre&gt;
+        </content>
+    </entry>
+</feed>
+"""
+
+JONESY_TEMPLATES_CONFIG    = """\
+<?xml version="1.0" encoding="utf-8"?>
+<!--  This is an example feeds list     -->
+<!--  You should modify it by yourself  -->
+<muon version="1.0">
+    <head>
+    </head>
+    <body>
+        <feeds>
+            <feed source="https://news.ycombinator.com/rss" result="yc.feed" />
+        </feeds>
+    </body>
+</muon>
+"""
+
+def main():
+
+    mode = sys.argv[1]
+
+    if   mode == "setup":
+        do_mode_setup()
+    elif mode == "serve":
+        do_mode_serve()
+    elif mode == "fetch":
+        do_mode_fetch()
+    else:
+        print("{0}: there is no such mode, closing.".format(mode))
+
+
+def do_mode_setup():
+
+    def create_directory(path):
+        if not os.path.exists(path):
+            os.makedirs(path)
+
+    def create_file(path, data):
+        if not os.path.exists(path):
+            file = open(path, "w")
+            file.write(data)
+            file.close()
+
+    create_directory(JONESY_HOME)
+    create_directory(JONESY_HOME + "/feeds")
+
+    create_file(JONESY_HOME + "/config", JONESY_TEMPLATES_CONFIG)
+
+
+def do_mode_serve():
+    print(None)
+
+
+def do_mode_fetch():
+    file = open(JONESY_HOME + "/config", "r")
+    data = file.read()
+    file.close()
+
+    dom = xml.dom.minidom.parseString(data)
+    nodes = dom.getElementsByTagName("feed")
+
+    for node in nodes:
+        source_path = node.getAttribute("source")
+        result_path = node.getAttribute("result")
+
+        url_request = urllib.request.Request(
+            source_path,
+            headers={
+                "User-Agent": JONESY_BUAS
+            }
+        )
+
+        url_response = urllib.request.urlopen(url_request)
+        data = url_response.read()
+
+        result_file = open(result_path, "wb")
+        result_file.write(data)
+        result_file.close()
+
+if __name__ == "__main__":
+    main()
