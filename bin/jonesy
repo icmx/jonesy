@@ -95,7 +95,7 @@ def do_mode_setup():
     create_directory(JONESY_HOME)
     create_directory(JONESY_HOME + "/feeds")
 
-    create_file(JONESY_HOME + "/config", JONESY_TEMPLATES_CONFIG)
+    create_file(JONESY_HOME + "/config.xml", JONESY_TEMPLATES_CONFIG)
 
 
 def do_mode_serve():
@@ -151,7 +151,7 @@ def do_mode_serve():
 
 
 def do_mode_fetch():
-    file = open(JONESY_HOME + "/config", "r")
+    file = open(JONESY_HOME + "/config.xml", "r")
     data = file.read()
     file.close()
 
