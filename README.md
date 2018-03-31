@@ -28,9 +28,9 @@ This will create sample configuration in default directories — however one can
 
 One can start Jonesy in three modes:
 
-  - `jonesy setup` — creates example configuration as explained above
-  - `jonesy fetch` — obtains feeds from sources defined in config file
-  - `jonesy serve` — serves retrieved feeds for external reader application (127.0.0.1 port 8600 by default).
+  - `jonesy setup` — single-shot, creates example configuration as explained above
+  - `jonesy fetch` — another single-shot, obtains feeds from sources defined in config file
+  - `jonesy serve` — runs until canceled, this mode serves retrieved feeds for external reader application (127.0.0.1 port 8600 by default).
 
 ### External Readers Connection
 
@@ -46,7 +46,7 @@ Replace 127.0.0.1 by external address, e.g. http://example.org:8600/feeds/news.f
 
 ### Automatic Feed Updates
 
-Jonesy is unable to update local feeds automatically. You have to do that manually or set up a recurrent job by at, Cron, systemd or other suitable for your system. That job should execute jonesy-fetch from time to time in a way you like it.
+Jonesy is unable to update local feeds automatically. You have to do that manually or set up a recurrent job by at, Cron, systemd or other suitable for your system. That job should just execute jonesy fetch mode from time to time in a way you like it.
 
 If you don't like to set up scheduler or your system have no any, there is a backup plan: one should access to special URL that will signal Jonesy to update its feeds:
 
