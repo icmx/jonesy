@@ -37,14 +37,12 @@ One can start Jonesy in three modes:
 To use Jonesy, one should connect an external application to Jonesy's feeds. Suppose you have only one feed in your config file:
 
 ```xml
-  <!-- ... -->
-  <feed source="https://news.ycombinator.com/rss" result="yc.feed" />
-  <!-- ... -->
+  <feed source="http://example.org/rss" result="news.feed" />
 ```
 
-Be default reader application connects to original feed URL — https://news.ycombinator.com/rss, but since Jonesy retrieves and serves feeds locally, you have to use local feed link instead — http://127.0.0.1:8600/feeds/yc.feed. Note the path: `yc.feed` is actually result file previously specified in config.
+Be default reader application connects to original feed URL — http://example.org/rss, but since Jonesy retrieves and serves feeds locally, you have to use local feed link instead — http://127.0.0.1:8600/feeds/news.feed. Note the path: `news.feed` is actually result file previously specified in config.
 
-Replace 127.0.0.1 by external address, e.g. http://example.org:8600/jonesyfeeds/reddit.feed if you run Jonesy on external host (like on home server).
+Replace 127.0.0.1 by external address, e.g. http://example.org:8600/jonesyfeeds/news.feed if you run Jonesy on external host (like on home server).
 
 ### Automatic Feed Updates
 
