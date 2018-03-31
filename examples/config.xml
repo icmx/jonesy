@@ -1,0 +1,18 @@
+  <?xml version="1.0" encoding="utf-8"?>
+  <muon version="1.0">
+    <!--
+      Example of jonesyrc file
+      It should be placed at ~/.jonesy or other directory if
+      $JONESY_HOME is set.
+    -->
+    <head>
+    </head>
+    <body>
+      <feeds>
+        <feed source="https://news.ycombinator.com/rss" result="hackernews.feed" />
+        <feed source="https://blog.mozilla.org/feed" result="mozilla.feed" />
+        <feed source="https://www.reddit.com/r/linux/.rss" result="reddit-linux.feed" />
+        <feed source="https://github.com/curl/curl/commits.atom" result="github-curl.feed" />
+      </feeds>
+    </body>
+  </muon>
