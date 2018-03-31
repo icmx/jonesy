@@ -110,5 +110,10 @@ See also: [Jonesy config example](examples/config.xml).
 
 ## TODO
 
-  - Clean code style
-  - Avoid `xml.dom` and try to use something other instead
+  - [x] Remove shell dependency
+  - [x] Remove cURL dependency
+    - [x] Replace curlrc by own config
+  - [ ] Add handling for `/` and `/config` paths in serve mode
+  - [ ] Public Muon document specification
+  - [ ] Clean code style
+  - [ ] Avoid `xml.dom` and try to use something other instead
