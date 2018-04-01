@@ -74,7 +74,7 @@ This URL provides a single-entry feed which should be placed at the top of exter
 
 #### Configuration Syntax
 
-Jonesy reads XML configuration in Muon format. Muon specs are currently in early development (i.e. there is no any specs in public), and for now it only supports `<feed>` entries, like here:
+Jonesy reads XML configuration in Muon format which looks like this:
 
 ```xml
   <?xml version="1.0" encoding="utf-8"?>
@@ -90,18 +90,22 @@ Jonesy reads XML configuration in Muon format. Muon specs are currently in early
   </muon>
 ```
 
-**Note:** some feeds URLs contains ampersand characters **`&`**, for instance:
+> Muon specs are currently in early development and available [here](https://github.com/icmx/muon).
+
+##### Note for `&`s
+
+Some feeds URLs contains ampersand characters **`&`**, for instance:
 
 ```
   http://example.org/get?news&type=rss"
-                             ^ it's here
+                             ^ here
 ```
 
-In XML `&` must be replaced by `&amp;`, like so:
+In XML `&`s must be replaced by `&amp;`, like so:
 
 ```xml
   <feed source="http://example.org/get?news&amp;type=rss"" result="news.feed" />
-  <!--                                     ^^^^^ it's here                   -->
+  <!--                                     ^^^^^ here                        -->
 ```
 
 See also: [Jonesy config example](examples/config.muon).
