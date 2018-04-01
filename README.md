@@ -115,7 +115,7 @@ See also: [Jonesy config example](examples/config.muon).
   - [x] Remove shell dependency
   - [x] Remove cURL dependency
     - [x] Replace curlrc by own config
-  - [ ] Support `enabled` attribute in `<feed>` element
+  - [x] Support `enabled` attribute in `<feed>` element
   - [ ] Add handling for `/` and `/config` paths in serve mode
   - [ ] Public Muon document specification
   - [ ] Clean code style

@@ -164,30 +164,31 @@ def do_mode_fetch():
     data = read(JONESY_HOME + "/config.muon", "r")
 
     dom = xml.dom.minidom.parseString(data)
-    nodes = dom.getElementsByTagName("feed")
+    elements = dom.getElementsByTagName("feed")
 
-    for node in nodes:
-        source_path = node.getAttribute("source")
-        result_path = node.getAttribute("result")
+    for element in elements:
+        if element.getAttribute("enabled") != "false":
+            source_path = element.getAttribute("source")
+            result_path = element.getAttribute("result")
 
-        print("Trying to update feed {0} ...".format(
-            source_path.replace("&", "&amp;")
-        ))
-        url_request = urllib.request.Request(
-            source_path,
-            headers={
-                "User-Agent": JONESY_BUAS
-            }
-        )
+            print("Trying to update feed {0} ...".format(
+                source_path.replace("&", "&amp;")
+            ))
+            url_request = urllib.request.Request(
+                source_path,
+                headers={
+                    "User-Agent": JONESY_BUAS
+                }
+            )
 
-        print("\tRequest ...")
-        url_response = urllib.request.urlopen(url_request)
-        data = url_response.read()
+            print("\tRequest ...")
+            url_response = urllib.request.urlopen(url_request)
+            data = url_response.read()
 
-        print("\tSaving to {0} ...".format(result_path))
-        write(JONESY_HOME + "/feeds/" + result_path, "wb", data)
+            print("\tSaving to {0} ...".format(result_path))
+            write(JONESY_HOME + "/feeds/" + result_path, "wb", data)
 
-        print("\tOK.")
+            print("\tOK.")
 
     print("End of feeds list.")
 
