@@ -46,7 +46,7 @@ Replace 127.0.0.1 by external address, e.g. http://example.org:8600/feeds/news.f
 
 ### Automatic Feed Updates
 
-Jonesy is unable to update local feeds automatically. You have to do that manually or set up a recurrent job by at, Cron, systemd or other suitable for your system. That job should just execute jonesy fetch mode from time to time in a way you like it.
+Jonesy is unable to update local feeds automatically. You have to do that manually or set up a recurrent job by at, Cron, systemd or other suitable for your system. That job should just execute `jonesy fetch` from time to time in a way you like it.
 
 If you don't like to set up scheduler or your system have no any, there is a backup plan: one should access to special URL that will signal Jonesy to update its feeds:
 
@@ -101,7 +101,7 @@ In XML ampersands must be replaced by `&amp;`, like so:
 
 ```xml
   <feed source="http://example.org/get?news&amp;type=rss"" result="news.feed" />
-  <!--                                     ^ it's here                       -->
+  <!--                                     ^^^^^ it's here                   -->
 ```
 
 See also: [Jonesy config example](examples/config.xml).
