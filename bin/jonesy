@@ -18,8 +18,8 @@ JONESY_PORT = os.environ.get("JONESY_PORT", "8600")
 
 JONESY_BUAS = os.environ.get(
     "JONESY_USERAGENT",
-    "Mozilla/5.0 (X11; Linux x86_64; rv:52.7.3) Gecko/20100101 Firefox/\
-    52.7.3"
+    "Mozilla/5.0 (X11; Linux x86_64; rv:52.7.3) Gecko/20100101 \
+    Firefox/52.7.3"
 )
 
 JONESY_TEMPLATES_FETCHFEED = """\
@@ -60,24 +60,38 @@ JONESY_TEMPLATES_CONFIG    = """\
     </head>
     <body>
         <feeds>
-            <feed source="https://news.ycombinator.com/rss" result="yc.feed" />
+            <feed source="http://example.org/rss" result="news.feed" />
         </feeds>
     </body>
 </muon>
 """
 
+
 def main():
-
-    mode = sys.argv[1]
-
-    if   mode == "setup":
+    if   len(sys.argv) == 1:
+        print("Usage: jonesy {setup,serve,fetch}")
+    elif sys.argv[1] == "setup":
         do_mode_setup()
-    elif mode == "serve":
+    elif sys.argv[1] == "serve":
         do_mode_serve()
-    elif mode == "fetch":
+    elif sys.argv[1] == "fetch":
         do_mode_fetch()
     else:
-        print("{0}: there is no such mode, closing.".format(mode))
+        print("jonesy: {0}: there is no such mode, exiting.".format(
+            sys.argv[1]
+        ))
+
+
+def read(path, mode):
+    file = open(path, mode)
+    data = file.read()
+    file.close()
+    return data
+
+def write(path, mode, data):
+    file = open(path, mode)
+    file.write(data)
+    file.close()
 
 
 def do_mode_setup():
@@ -88,9 +102,7 @@ def do_mode_setup():
 
     def create_file(path, data):
         if not os.path.exists(path):
-            file = open(path, "w")
-            file.write(data)
-            file.close()
+            write(path, "w", data)
 
     create_directory(JONESY_HOME)
     create_directory(JONESY_HOME + "/feeds")
@@ -129,11 +141,9 @@ def do_mode_serve():
                 self.wfile.write(bytes(response, "utf-8"))
             else:
                 try:
-                    file = open(os.path.realpath(
+                    data = read(os.path.realpath(
                         JONESY_HOME + self.path), "rb"
                     )
-                    data = file.read()
-                    file.close()
                 except:
                     self.send_headers_fail()
                 else:
@@ -143,7 +153,7 @@ def do_mode_serve():
     print("Starting Jonesy at http://{0}:{1} ...".format(
         JONESY_HOST, JONESY_PORT
     ))
-    print("Press Ctrl + C to cancel.")
+    print("Serving. Press Ctrl + C to stop.")
 
     server_address = (JONESY_HOST, int(JONESY_PORT))
     httpd          = HTTPServer(server_address, CustomHTTPRequesHandler)
@@ -151,9 +161,7 @@ def do_mode_serve():
 
 
 def do_mode_fetch():
-    file = open(JONESY_HOME + "/config.xml", "r")
-    data = file.read()
-    file.close()
+    data = read(JONESY_HOME + "/config.xml", "r")
 
     dom = xml.dom.minidom.parseString(data)
     nodes = dom.getElementsByTagName("feed")
@@ -177,11 +185,12 @@ def do_mode_fetch():
         data = url_response.read()
 
         print("\tSaving ...")
-        result_file = open(JONESY_HOME + "/feeds/" +result_path, "wb")
-        result_file.write(data)
-        result_file.close()
+        write(JONESY_HOME + "/feeds/" + result_path, "wb", data)
 
         print("\tSaved successfull to {0}.".format(result_path))
+
+    print("End of feeds list.")
+
 
 if __name__ == "__main__":
     main()
