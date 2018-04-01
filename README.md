@@ -9,10 +9,10 @@ One should consider that Jonesy is more of an idea than real software which is a
 Jonesy depends only on Python 3 and its standard library components. All you need is just get latest version from git:
 
 ```sh
-  git clone https://github.com/icmx/jonesy local-repo-path
+  git clone "https://github.com/icmx/jonesy" "local-repo"
 ```
 
-Once obtained, modify your [`$PATH`](https://en.wikipedia.org/wiki/PATH_(variable)) variable by adding local-repo-path/bin directory — or create a symlink to local-repo-path/bin/jonesy.
+Once obtained, modify your [`$PATH`](https://en.wikipedia.org/wiki/PATH_(variable)) variable by adding local-repo/bin directory — or create a symlink to local-repo/bin/jonesy.
 
 Finally, run Jonesy in setup mode:
 
@@ -69,7 +69,7 @@ This URL provides a single-entry feed which should be placed at the top of exter
 
 ### Files and Directories
 
-  - `$JONESY_HOME/config.xml` — file for configuration and feeds list.
+  - `$JONESY_HOME/config.muon` — file for configuration and feeds list.
   - `$JONESY_HOME/feeds` — directory for retrieved feeds files.
 
 #### Configuration Syntax
@@ -83,7 +83,7 @@ Jonesy reads XML configuration in Muon format. Muon specs are currently in early
     </head>
     <body>
       <feeds>
-        <feed source="https://news.ycombinator.com/rss" result="yc.feed" />
+        <feed enabled="true" source="https://news.ycombinator.com/rss" result="yc.feed" />
         <!-- and so on ... -->
       </feeds>
     </body>
@@ -97,20 +97,21 @@ Jonesy reads XML configuration in Muon format. Muon specs are currently in early
                              ^ it's here
 ```
 
-In XML ampersands must be replaced by `&amp;`, like so:
+In XML `&` must be replaced by `&amp;`, like so:
 
 ```xml
   <feed source="http://example.org/get?news&amp;type=rss"" result="news.feed" />
   <!--                                     ^^^^^ it's here                   -->
 ```
 
-See also: [Jonesy config example](examples/config.xml).
+See also: [Jonesy config example](examples/config.muon).
 
 ## TODO
 
   - [x] Remove shell dependency
   - [x] Remove cURL dependency
     - [x] Replace curlrc by own config
+  - [ ] Support `enabled` attribute in `<feed>` element
   - [ ] Add handling for `/` and `/config` paths in serve mode
   - [ ] Public Muon document specification
   - [ ] Clean code style
