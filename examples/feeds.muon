@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <muon version="1.0">
   <!--
-    Example of Jonesy configuration file
-    It should be placed at ~/.jonesy or other directory if $JONESY_HOME
-    is set.
+    This is an example of Jonesy feeds list file.
+    It should be placed in $JONESY_HOME/feeds.muon.
+    See README.md for more.
   -->
   <head>
   </head>
