@@ -1,36 +1,37 @@
 # Jonesy
 
-Jonesy is extremely minimalistic aggregator for RSS, Atom and other web feeds. It works between user's reader application and original feed source which allows to synchronise feeds list for multiple devices and save original reader application experience.
+Jonesy is extremely minimalistic aggregator for RSS, Atom and other web feeds. It works between users' reader application and original feed source which allows to synchronise feeds list for multiple devices and save original reader application experience.
 
 One should consider that Jonesy is more of an idea than real software which is actually pretty crappy.
 
 ## Setup
 
-Jonesy depends only on Python 3 and its standard library components. All you need is just get latest version from git:
+Jonesy depends only on Python 3 and its standard components. All you need is just get latest version from git repository:
 
 ```sh
-  git clone "https://github.com/icmx/jonesy" "local-repo"
+  git clone "https://github.com/icmx/jonesy" "local-copy"
 ```
 
-Once obtained, modify your [`$PATH`](https://en.wikipedia.org/wiki/PATH_(variable)) variable by adding local-repo/bin directory — or create a symlink to local-repo/bin/jonesy.
-
-Finally, run Jonesy in setup mode:
+Then make the following:
 
 ```sh
-  jonesy setup
+  cd local-copy
+
+  mkdir $XDG_CONFIG_HOME/jonesy
+  mkdir $XDG_CONFIG_HOME/jonesy/feeds
+  cp examples/feeds.muon examples/config.ini $XDG_CONFIG_HOME/jonesy
 ```
 
-This will create sample configuration in default directories — however one can override the defaults by modifying [environment variables](#environment-variables).
+Jonesy assumes that you have [XDG base directories](https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html) defined in environment variables. If such variables is not set, it will use ~/.jonesy.
 
 ## Usage
 
 ### Modes
 
-One can start Jonesy in three modes:
+One can start Jonesy in two modes:
 
-  - `jonesy setup` — single-shot, creates example configuration as explained above
-  - `jonesy fetch` — another single-shot, obtains feeds from sources defined in config file
-  - `jonesy serve` — runs until canceled, this mode serves retrieved feeds for external reader application (127.0.0.1 port 8600 by default).
+  - `jonesy fetch` — single-shot, obtains feeds from sources defined in config file
+  - `jonesy serve` — runs until cancelled, this mode serves retrieved feeds for external reader application (127.0.0.1 port 8600 by default).
 
 ### External Readers Connection
 
@@ -58,57 +59,37 @@ Or, if Jonesy is serving on another host:
 
 This URL provides a single-entry feed which should be placed at the top of external reader application feeds list. That is application will first ask Jonesy to update local feeds and then it will download them. Unfortunately this won't work if reader application updates feeds in multiple threads.
 
+*See also: [updater script](examples/updater.sh)*
+
 ## Configuration
 
 ### Environment Variables
 
-  - `$JONESY_HOME` — directory for configuration file and retrieved feeds. Default is `$HOME/.jonesy`.
-  - `$JONESY_HOST` — host address on which Jonesy will accept requests. Default is `127.0.0.1`.
-  - `$JONESY_PORT` — port on which Jonesy will accept requests. Default is `8600`.
-  - `$JONESY_BUAS` — browser user agent string. By default Jonesy trying to disguise itself as a Firefox ESR, so feeds web servers will treat it as a human user.
+  - `$JONESY_HOME` — alternative directory for configuration file and retrieved feeds. It's assumed as `$XDG_CONFIG_HOME/jonesy` if XDG variables are set.
 
 ### Files and Directories
 
-  - `$JONESY_HOME/config.muon` — file for configuration and feeds list.
+  - `$JONESY_HOME/feeds.muon` — file for feeds list (see note below).
+  - `$JONESY_HOME/config.ini` — file for configuration.
   - `$JONESY_HOME/feeds` — directory for retrieved feeds files.
 
-#### Configuration Syntax
+*Note:* Muon specs are currently in early development and available [here](https://github.com/icmx/muon).
 
-Jonesy reads XML configuration in Muon format which looks like this:
+#### Note for `&`s
 
-```xml
-  <?xml version="1.0" encoding="utf-8"?>
-  <muon version="1.0">
-    <head>
-    </head>
-    <body>
-      <feeds>
-        <feed enabled="true" source="https://news.ycombinator.com/rss" result="yc.feed" />
-        <!-- and so on ... -->
-      </feeds>
-    </body>
-  </muon>
-```
-
-> Muon specs are currently in early development and available [here](https://github.com/icmx/muon).
-
-##### Note for `&`s
-
-Some feeds URLs contains ampersand characters **`&`**, for instance:
+Some feeds URLs contains ampersand characters `&`, for instance:
 
 ```
   http://example.org/get?news&type=rss"
                              ^ here
 ```
 
-In XML `&`s must be replaced by `&amp;`, like so:
+In Muon feeds list (as well as other XML files) ampersands `&` must be replaced by `&amp;`, like so:
 
 ```xml
   <feed source="http://example.org/get?news&amp;type=rss"" result="news.feed" />
   <!--                                     ^^^^^ here                        -->
 ```
-
-See also: [Jonesy config example](examples/config.muon).
 
 ## TODO
 
@@ -116,7 +97,7 @@ See also: [Jonesy config example](examples/config.muon).
   - [x] Remove cURL dependency
     - [x] Replace curlrc by own config
   - [x] Support `enabled` attribute in `<feed>` element
-  - [ ] Add handling for `/` and `/config` paths in serve mode
-  - [ ] Public Muon document specification
+  - [x] Add handling for `/` ~~and `/config`~~ paths in serve mode
+  - [x] Public Muon document specification
+  - [x] Avoid `xml.dom` and try to use something other instead
   - [ ] Clean code style
-  - [ ] Avoid `xml.dom` and try to use something other instead
