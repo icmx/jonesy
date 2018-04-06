@@ -1,197 +1,203 @@
 #!/usr/bin/env python3
 
-
-from http.server import BaseHTTPRequestHandler, HTTPServer
-import datetime
-import os
-import subprocess
-import sys
-import urllib.request
-import xml.dom.minidom
-
-
-HOME        = os.environ.get("HOME")
-
-JONESY_HOME = os.environ.get("JONESY_HOME", HOME + "/.jonesy")
-JONESY_HOST = os.environ.get("JONESY_HOST", "127.0.0.1")
-JONESY_PORT = os.environ.get("JONESY_PORT", "8600")
-
-JONESY_BUAS = os.environ.get(
-    "JONESY_USERAGENT",
-    "Mozilla/5.0 (X11; Linux x86_64; rv:52.7.3) Gecko/20100101 \
-    Firefox/52.7.3"
-)
-
-JONESY_TEMPLATES_FETCHFEED = """\
-<?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom">
-    <title>Jonesy Bumper Feed</title>
-    <subtitle>
-        This feed is a backup update trigger — if you access it, then
-        jonesy-serve will execute jonesy-fetch and update all your
-        feeds. It's better to use external schedulers however ­— such as
-        at, Cron or systemd service.
-    </subtitle>
-    <updated>{isodate}</updated>
-    <entry>
-        <title>Update started at {isodate}</title>
-        <updated>{isodate}</updated>
-        <content type="html">
-            &lt;p&gt;
-                If you can read this, then your local feeds are already
-                updated.
-            &lt;/p&gt;
-            &lt;p&gt;
-                jonesy output:
-            &lt;/p&gt;
-            &lt;pre style=&#39;white-space:pre-wrap;&#39;&gt;{output}
-            &lt;/pre&gt;
-        </content>
-    </entry>
-</feed>
-"""
-
-JONESY_TEMPLATES_CONFIG    = """\
-<?xml version="1.0" encoding="utf-8"?>
-<!--  This is an example feeds list     -->
-<!--  You should modify it by yourself  -->
-<muon version="1.0">
-    <head>
-    </head>
-    <body>
-        <feeds>
-            <feed source="http://example.org/rss" result="news.feed" />
-        </feeds>
-    </body>
-</muon>
-"""
-
+from os           import environ
+from sys          import argv
+from configparser import ConfigParser
 
 def main():
-    if   len(sys.argv) == 1:
-        print("Usage: jonesy {setup,serve,fetch}")
-    elif sys.argv[1] == "setup":
-        do_mode_setup()
-    elif sys.argv[1] == "serve":
-        do_mode_serve()
-    elif sys.argv[1] == "fetch":
-        do_mode_fetch()
-    else:
-        print("jonesy: {0}: there is no such mode, exiting.".format(
-            sys.argv[1]
-        ))
+
+    def read(path, mode):
+        file = open(path, mode)
+        data = file.read()
+        file.close()
+        return data
+
+    def write(path, mode, data):
+        file = open(path, mode)
+        file.write(data)
+        file.close()
 
 
-def read(path, mode):
-    file = open(path, mode)
-    data = file.read()
-    file.close()
-    return data
+    def do_mode_fetch():
+        from urllib.request import Request
+        from urllib.request import urlopen
+        from xml.etree      import ElementTree
 
-def write(path, mode, data):
-    file = open(path, mode)
-    file.write(data)
-    file.close()
+        feeds = ElementTree.parse(HOME + "/feeds.muon")
+
+        for feed in feeds.iter("feed"):
+            if feed.get("enabled") != "false":
+                source = feed.get("source")
+                output = feed.get("output")
+
+                print("Trying to update {0} ...".format(source))
+                request = Request(
+                    source, headers={ "User-Agent": config_useragent }
+                )
+
+                response = urlopen(request)
+                data = response.read()
+
+                write(HOME + "/feeds/" + output, "wb", data)
+
+                print("\tOK.")
+
+        print("End of feeds list.")
 
 
-def do_mode_setup():
+    def do_mode_serve():
+        from datetime    import datetime
+        from datetime    import timezone
+        from http.server import BaseHTTPRequestHandler
+        from http.server import HTTPServer
+        from os.path     import realpath
 
-    def create_directory(path):
-        if not os.path.exists(path):
-            os.makedirs(path)
+        class CustomHTTPRequesHandler(BaseHTTPRequestHandler):
 
-    def create_file(path, data):
-        if not os.path.exists(path):
-            write(path, "w", data)
+            def send_headers_ok(self, content_type):
+                self.send_response(200)
+                self.send_header("Content-Type", content_type)
+                self.end_headers()
 
-    create_directory(JONESY_HOME)
-    create_directory(JONESY_HOME + "/feeds")
+            def send_headers_fail(self):
+                self.send_response(400)
+                self.end_headers()
 
-    create_file(JONESY_HOME + "/config.muon", JONESY_TEMPLATES_CONFIG)
+            def send_payload_string(self, data, content_type):
+                self.send_headers_ok(content_type)
+                self.wfile.write(bytes(data, "utf-8"))
 
-
-def do_mode_serve():
-    class CustomHTTPRequesHandler(BaseHTTPRequestHandler):
-
-        def send_headers_ok(self):
-            self.send_response(200)
-            self.send_header("Content-Type", "application/xml")
-            self.end_headers()
-
-        def send_headers_fail(self):
-            self.send_response(400)
-            self.end_headers()
-
-        def do_GET(self):
-
-            print("\tAccessing to path {0}".format(self.path))
-
-            if   self.path == "/":
-                print("")
-            elif self.path == "/config":
-                print("")
-            elif self.path == "/fetch":
-                output   = subprocess.getoutput("jonesy fetch")
-                isodate  = datetime.datetime.utcnow().replace(
-                    tzinfo=datetime.timezone.utc).isoformat()
-                response = JONESY_TEMPLATES_FETCHFEED.format(
-                    isodate=isodate, output=output)
-
-                self.send_headers_ok()
-                self.wfile.write(bytes(response, "utf-8"))
-            else:
+            def send_payload_file(self, path, content_type):
                 try:
-                    data = read(os.path.realpath(
-                        JONESY_HOME + self.path), "rb"
-                    )
+                    data = read(realpath(path), "rb")
                 except:
                     self.send_headers_fail()
                 else:
-                    self.send_headers_ok()
+                    self.send_headers_ok(content_type)
                     self.wfile.write(data)
 
-    print("Starting Jonesy at http://{0}:{1} ...".format(
-        JONESY_HOST, JONESY_PORT
-    ))
-    print("Serving. Press Ctrl + C to stop.")
+            def do_GET(self):
 
-    server_address = (JONESY_HOST, int(JONESY_PORT))
-    httpd          = HTTPServer(server_address, CustomHTTPRequesHandler)
-    httpd.serve_forever()
+                print("\tAccessing to path {0}".format(self.path))
+
+                if   self.path == "/":
+                    response = VIEW_INDEX.format(
+                        host=config_host, port=config_port
+                    )
+                    self.send_payload_string(response, "text/html")
+                elif self.path == "/fetch":
+                    do_mode_fetch()
+
+                    date = datetime.utcnow().replace(
+                        tzinfo=timezone.utc
+                    ).isoformat()
+
+                    response = VIEW_FETCH.format(date=date)
+
+                    self.send_payload_string(
+                        response, "application/xml"
+                    )
+                else:
+                    self.send_payload_file(
+                        HOME + self.path, "application/xml"
+                    )
+
+        print("Starting Jonesy at http://{0}:{1} ...".format(
+            config_host, config_port
+        ))
+        print("Serving. Press Ctrl + C to stop.")
+
+        server = HTTPServer(
+            (config_host, config_port),
+            CustomHTTPRequesHandler)
+        server.serve_forever()
 
 
-def do_mode_fetch():
-    data = read(JONESY_HOME + "/config.muon", "r")
+    VIEW_FETCH = """<?xml version="1.0" encoding="utf-8"?>
+        <feed xmlns="http://www.w3.org/2005/Atom">
+            <title>Jonesy Bumper Feed</title>
+            <subtitle>
+                This feed is a backup update trigger — if you access it,
+                then jonesy will execute fetch mode and update all your
+                feeds. It's better to use external schedulers however ­—
+                such as at, Cron or systemd service.
+            </subtitle>
+            <updated>{date}</updated>
+            <entry>
+                <title>Update started at {date}</title>
+                <updated>{date}</updated>
+                <content type="html">
+                    &lt;p&gt;
+                        If you can read this, then your local feeds are
+                        already updated.
+                    &lt;/p&gt;
+                </content>
+            </entry>
+        </feed>
+    """
 
-    dom = xml.dom.minidom.parseString(data)
-    elements = dom.getElementsByTagName("feed")
+    VIEW_INDEX = """<!doctype html>
+        <html>
+            <head>
+                <meta name="viewport" content="width=device-width" />
+                <meta charset="utf-8" />
+                <title>It works!</title>
+                <style>
+                    body {{
+                        background-color: #EEE;
+                        color:            #444;
+                        font-size:        18px;
+                        line-height:      1.5;
+                        margin:           60px auto;
+                        max-width:        720px;
+                        padding:          0 16px;
+                    }}
+                </style>
+            </head>
+            <body>
+                <h1>
+                    It works!
+                </h1>
+                <p>
+                    Jonesy is serving on <a href="/">{host}:{port}</a>.
+                </p>
+                <ul>
+                    <li>
+                        Feeds are available in <a href="/feeds">
+                        /feeds</a> directory. There is no directory
+                        listing however, so you should know the exact
+                        feed file name (e.g. /feeds/reddit.feed)
+                    </li>
+                    <li>
+                        You can refresh them manually by accessing
+                        <a href="/fetch">/fetch</a> path. Note that
+                        refreshing will take a while if your feeds list
+                        is quite long
+                    </li>
+                </ul>
+            </body>
+        </html>
+    """
 
-    for element in elements:
-        if element.getAttribute("enabled") != "false":
-            source_path = element.getAttribute("source")
-            result_path = element.getAttribute("result")
+    HOME = environ.get("HOME")
+    HOME = environ.get("XDG_CONFIG_HOME", HOME + ".jonesy")
+    HOME = environ.get("JONESY_HOME", HOME + "/jonesy")
 
-            print("Trying to update feed {0} ...".format(
-                source_path.replace("&", "&amp;")
-            ))
-            url_request = urllib.request.Request(
-                source_path,
-                headers={
-                    "User-Agent": JONESY_BUAS
-                }
-            )
+    config = ConfigParser()
+    config.read(HOME + "/config.ini")
 
-            print("\tRequest ...")
-            url_response = urllib.request.urlopen(url_request)
-            data = url_response.read()
+    config_useragent = config.get("fetch", "useragent")
+    config_host      = config.get("serve", "host")
+    config_port      = config.getint("serve", "port")
 
-            print("\tSaving to {0} ...".format(result_path))
-            write(JONESY_HOME + "/feeds/" + result_path, "wb", data)
-
-            print("\tOK.")
-
-    print("End of feeds list.")
-
+    if   len(argv) == 1:
+        print("Usage: jonesy {fetch,serve}")
+    elif argv[1]   == "serve":
+        do_mode_serve()
+    elif argv[1]   == "fetch":
+        do_mode_fetch()
+    else:
+        print("{0}: unknown mode. Exiting.".format(argv[1]))
 
 if __name__ == "__main__":
     main()
