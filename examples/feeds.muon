@@ -9,10 +9,10 @@
   </head>
   <body>
     <feeds>
-      <feed enabled="true" source="https://news.ycombinator.com/rss" result="hackernews.feed" />
-      <feed enabled="true" source="https://blog.mozilla.org/feed" result="mozilla.feed" />
-      <feed enabled="true" source="https://www.reddit.com/r/linux/.rss" result="reddit-linux.feed" />
-      <feed enabled="true" source="https://github.com/curl/curl/commits.atom" result="github-curl.feed" />
+      <feed enabled="true" source="https://news.ycombinator.com/rss" output="hackernews.feed" />
+      <feed enabled="true" source="https://blog.mozilla.org/feed" output="mozilla.feed" />
+      <feed enabled="true" source="https://www.reddit.com/r/linux/.rss" output="reddit-linux.feed" />
+      <feed enabled="true" source="https://github.com/curl/curl/commits.atom" output="github-curl.feed" />
     </feeds>
   </body>
 </muon>
