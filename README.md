@@ -22,7 +22,7 @@ Then make the following:
   cp examples/feeds.muon examples/config.ini $XDG_CONFIG_HOME/jonesy
 ```
 
-Jonesy assumes that you have [XDG base directories](https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html) defined in environment variables. If such variables is not set, it will use ~/.jonesy.
+Jonesy assumes that you have [XDG base directories](https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html) defined in environment variables. If such variables aren't set, it will use ~/.jonesy.
 
 ## Usage
 
@@ -41,7 +41,7 @@ To use Jonesy, one should connect an external application to Jonesy's feeds. Sup
   <feed source="http://example.org/rss" result="news.feed" />
 ```
 
-Be default reader application connects to original feed URL — http://example.org/rss, but since Jonesy retrieves and serves feeds locally, you have to use local feed link instead — http://127.0.0.1:8600/feeds/news.feed. Note the path: `news.feed` is actually result file previously specified in config.
+By default reader application connects to original feed URL — http://example.org/rss, but since Jonesy retrieves and serves feeds locally, you have to use local feed link instead — http://127.0.0.1:8600/feeds/news.feed. Note the path: `news.feed` is actually result file previously specified in config.
 
 Replace 127.0.0.1 by external address, e.g. http://example.org:8600/feeds/news.feed if you run Jonesy on external host (like on home server).
 
@@ -101,7 +101,7 @@ In Muon feeds list (as well as other XML files) ampersands `&` must be replaced 
   - [x] Public Muon document specification
   - [x] Avoid `xml.dom` and try to use something other instead
   - [ ] Add timestamps to logging
-  - [ ] Make is multithread (socket-based? what?)
+  - [ ] Make it multithread (socket-based? what?)
   - [ ] Add a basic web-interface
   - [ ] Design a basic API
   - [ ] Clean code style
