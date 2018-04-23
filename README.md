@@ -100,4 +100,8 @@ In Muon feeds list (as well as other XML files) ampersands `&` must be replaced 
   - [x] Add handling for `/` ~~and `/config`~~ paths in serve mode
   - [x] Public Muon document specification
   - [x] Avoid `xml.dom` and try to use something other instead
+  - [ ] Add timestamps to logging
+  - [ ] Make is multithread (socket-based? what?)
+  - [ ] Add a basic web-interface
+  - [ ] Design a basic API
   - [ ] Clean code style
