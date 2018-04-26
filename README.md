@@ -9,17 +9,17 @@ One should consider that Jonesy is more of an idea than real software which is a
 Jonesy depends only on Python 3 and its standard components. All you need is just get latest version from git repository:
 
 ```sh
-  git clone "https://github.com/icmx/jonesy" "local-copy"
+git clone "https://github.com/icmx/jonesy" "local-copy"
 ```
 
 Then make the following:
 
 ```sh
-  cd local-copy
+cd local-copy
 
-  mkdir $XDG_CONFIG_HOME/jonesy
-  mkdir $XDG_CONFIG_HOME/jonesy/feeds
-  cp examples/feeds.muon examples/config.ini $XDG_CONFIG_HOME/jonesy
+mkdir $XDG_CONFIG_HOME/jonesy
+mkdir $XDG_CONFIG_HOME/jonesy/feeds
+cp examples/feeds.muon examples/config.ini $XDG_CONFIG_HOME/jonesy
 ```
 
 Jonesy assumes that you have [XDG base directories](https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html) defined in environment variables. If such variables aren't set, it will use ~/.jonesy.
@@ -38,7 +38,7 @@ One can start Jonesy in two modes:
 To use Jonesy, one should connect an external application to Jonesy's feeds. Suppose you have only one feed in your config file:
 
 ```xml
-  <feed source="http://example.org/rss" result="news.feed" />
+<feed source="http://example.org/rss" result="news.feed" />
 ```
 
 By default reader application connects to original feed URL — http://example.org/rss, but since Jonesy retrieves and serves feeds locally, you have to use local feed link instead — http://127.0.0.1:8600/feeds/news.feed. Note the path: `news.feed` is actually result file previously specified in config.
@@ -80,15 +80,15 @@ This URL provides a single-entry feed which should be placed at the top of exter
 Some feeds URLs contains ampersand characters `&`, for instance:
 
 ```
-  http://example.org/get?news&type=rss"
-                             ^ here
+http://example.org/get?news&type=rss"
+                           ^ here
 ```
 
 In Muon feeds list (as well as other XML files) ampersands `&` must be replaced by `&amp;`, like so:
 
 ```xml
-  <feed source="http://example.org/get?news&amp;type=rss"" result="news.feed" />
-  <!--                                     ^^^^^ here                        -->
+<feed source="http://example.org/get?news&amp;type=rss"" result="news.feed" />
+<!--                                     ^^^^^ here                        -->
 ```
 
 ## TODO
@@ -100,7 +100,8 @@ In Muon feeds list (as well as other XML files) ampersands `&` must be replaced 
   - [x] Add handling for `/` ~~and `/config`~~ paths in serve mode
   - [x] Public Muon document specification
   - [x] Avoid `xml.dom` and try to use something other instead
-  - [ ] Add timestamps to logging
+  - [x] Add timestamps to logging
+  - [x] Add handling for web errors
   - [ ] Make it multithread (socket-based? what?)
   - [ ] Add a basic web-interface
   - [ ] Design a basic API
