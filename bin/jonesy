@@ -150,16 +150,17 @@ def do_mode_fetch():
             source = feed.get('source')
             output = feed.get('output')
 
-            log('Trying to update {0} ...'.format(source))
+            log('{0}: updating source ...'.format(source))
 
             request = Request(source, headers={'User-Agent': BUAS})
 
             try:
                 response = urlopen(request)
                 data = response.read()
-                write(join(HOME + '/feeds/' + output), 'wb', data)
+                log('{0}: saving to {1}  ...'.format(source, output))
+                write(join(HOME, 'feeds', output), 'wb', data)
             except Exception as exception:
-                log(exception)
+                log('exception: {0}'.format(exception))
             else:
                 log('OK.')
 

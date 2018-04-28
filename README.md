@@ -102,7 +102,7 @@ In Muon feeds list (as well as other XML files) ampersands `&` must be replaced 
   - [x] Avoid `xml.dom` and try to use something other instead
   - [x] Add timestamps to logging
   - [x] Add handling for web errors
-  - [ ] Make it multithread (socket-based? what?)
+  - [ ] Make it multithreaded (socket-based? what?)
   - [ ] Add a basic web-interface
-  - [ ] Design a basic API
+  - [ ] Design basic API
   - [ ] Clean code style
