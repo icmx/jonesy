@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/python3
 
 from configparser   import ConfigParser
 from datetime       import datetime
@@ -110,7 +110,7 @@ class CustomHTTPRequesHandler(BaseHTTPRequestHandler):
         pass
 
     def do_GET(self):
-        log('Accessing to path {0}'.format(self.path))
+        log('accessing to path {0}'.format(self.path))
 
         if   self.path == '/':
             response = VIEW_INDEX.format(host=HOST, port=PORT)
@@ -162,7 +162,7 @@ def do_mode_fetch():
             except Exception as exception:
                 log('exception: {0}'.format(exception))
             else:
-                log('OK.')
+                log('ok.')
 
     log('End of feeds list.')
 
@@ -170,11 +170,13 @@ def do_mode_fetch():
 def do_mode_serve():
     log('starting at http://{0}:{1} ...'.format(HOST, PORT))
 
-    server = HTTPServer((HOST, PORT), CustomHTTPRequesHandler)
-    server.serve_forever()
-
-    log('serving. Press Ctrl+C to stop.')
-
+    try:
+        server = HTTPServer((HOST, PORT), CustomHTTPRequesHandler)
+        server.serve_forever()
+    except Exception as exception:
+        log('unable to start: {0}'.format(exception))
+    else:
+        log('serving, press Ctrl+C to stop.')
 
 def main():
     if   len(argv) == 1:
