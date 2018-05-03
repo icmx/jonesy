@@ -1,6 +1,5 @@
 #!/usr/bin/python3
 
-from configparser   import ConfigParser
 from datetime       import datetime
 from http.server    import BaseHTTPRequestHandler
 from http.server    import HTTPServer
@@ -17,7 +16,8 @@ from threading      import Thread
 HOST      = None
 PORT      = None
 HOME      = None
-BUAS      = None
+USERAGENT = None
+THREADS   = None
 
 VIEW_FETCH = '''<?xml version="1.0" encoding="utf-8"?>
     <feed xmlns="http://www.w3.org/2005/Atom">
@@ -85,14 +85,8 @@ VIEW_INDEX = '''<!doctype html>
     </html>
 '''
 
+
 class IO():
-    def get_timestamp():
-        return datetime.now().replace(microsecond=0).isoformat()
-
-    def log(message):
-        timestamp = IO.get_timestamp()
-        print('jonesy: {0}: {1}'.format(timestamp, message))
-
     def read(path, mode):
         file = open(path, mode)
         data = file.read()
@@ -105,19 +99,36 @@ class IO():
         file.close()
 
     def fetch(source, output):
-        request = Request(source, headers={'User-Agent': BUAS})
+        request = Request(source, headers={'User-Agent': USERAGENT})
 
         try:
-            IO.log('{0}: accessing ...'.format(source))
+            Sh.log('{0}: accessing ...'.format(source))
             response = urlopen(request)
             data = response.read()
-            IO.log('{0}: saving to {1} ...'.format(source, output))
+            Sh.log('{0}: saving to {1} ...'.format(source, output))
             IO.write(join(HOME, 'feeds', output), 'wb', data)
         except Exception as exception:
-            IO.log('{0}: exception: {1}'.format(source, exception))
+            Sh.log('{0}: exception: {1}'.format(source, exception))
         else:
-            IO.log('{0}: ok.'.format(source))
+            Sh.log('{0}: ok.'.format(source))
 
+
+class Sh():
+    def timestamp():
+        return datetime.now().replace(microsecond=0).isoformat()
+
+    def log(message):
+        timestamp = Sh.timestamp()
+        print('jonesy: {0}: {1}'.format(timestamp, message))
+
+    def get(key, value=None):
+        return environ.get(key, value)
+
+    def getstr(key, value=None):
+        return Sh.get(key, value)
+
+    def getint(key, value=None):
+        return int(Sh.getstr(key, value))
 
 class JonesyFetchThread(Thread):
     def __init__(self, queue):
@@ -158,14 +169,14 @@ class JonesyHTTPRequestHandler(BaseHTTPRequestHandler):
         pass
 
     def do_GET(self):
-        IO.log('accessing to path {0}'.format(self.path))
+        Sh.log('accessing to path {0}'.format(self.path))
 
         if   self.path == '/':
             response = VIEW_INDEX.format(host=HOST, port=PORT)
             self.send_payload_string(response, 'text/html')
         elif self.path == '/fetch':
             do_mode_fetch()
-            date = IO.get_timestamp()
+            date = Sh.timestamp()
             response = VIEW_FETCH.format(date=date)
             self.send_payload_string(response, 'application/xml')
         else:
@@ -174,7 +185,6 @@ class JonesyHTTPRequestHandler(BaseHTTPRequestHandler):
 
 
 def do_mode_fetch():
-    THREADS = 4
     queue = Queue()
     feeds = ElementTree.parse(join(HOME + '/feeds.muon'))
 
@@ -193,15 +203,15 @@ def do_mode_fetch():
 
 
 def do_mode_serve():
-    IO.log('starting at http://{0}:{1} ...'.format(HOST, PORT))
+    Sh.log('starting at http://{0}:{1} ...'.format(HOST, PORT))
 
     try:
         server = HTTPServer((HOST, PORT), JonesyHTTPRequestHandler)
         server.serve_forever()
     except Exception as exception:
-        IO.log('unable to start: {0}'.format(exception))
+        Sh.log('unable to start: {0}'.format(exception))
     else:
-        IO.log('serving, press Ctrl+C to stop.')
+        Sh.log('serving, press Ctrl+C to stop.')
 
 def main():
     if   len(argv) == 1:
@@ -214,15 +224,15 @@ def main():
         print('{0}: unknown mode. Exiting.'.format(argv[1]))
 
 if __name__ == '__main__':
-    HOME = environ.get('HOME')
-    HOME = environ.get('XDG_CONFIG_HOME', join(HOME + '.jonesy'))
-    HOME = environ.get('JONESY_HOME',     join(HOME + '/jonesy'))
+    HOME      = Sh.getstr('HOME')
+    HOME      = Sh.getstr('XDG_CONFIG_HOME', join(HOME + '.jonesy'))
+    HOME      = Sh.getstr('JONESY_HOME',     join(HOME + '/jonesy'))
 
-    config = ConfigParser()
-    config.read(join(HOME + '/config.ini'))
-
-    BUAS = config.get('fetch', 'useragent')
-    HOST = config.get('serve', 'host')
-    PORT = config.getint('serve', 'port')
+    HOST      = Sh.getstr('JONESY_HOST',      '127.0.0.1')
+    PORT      = Sh.getint('JONESY_PORT',      '8600')
+    USERAGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:59.0) ' +\
+                'Gecko/20100101 Firefox/59.0'
+    USERAGENT = Sh.getstr('JONESY_USERAGENT', USERAGENT)
+    THREADS   = Sh.getint('JONESY_THREADS',   '4')
 
     main()

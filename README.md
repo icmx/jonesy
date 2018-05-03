@@ -1,6 +1,6 @@
 # Jonesy
 
-Jonesy is extremely minimalistic aggregator for RSS, Atom and other web feeds. It works between users' reader application and original feed source which allows to synchronise feeds list for multiple devices and save original reader application experience.
+Jonesy is and extremely minimalistic aggregator for RSS, Atom and other web feeds. It works between users' reader application and original feed source which allows to share and synchronise the single feeds list by multiple devices and save original reader application experience.
 
 One should consider that Jonesy is more of an idea than real software which is actually pretty crappy.
 
@@ -35,7 +35,7 @@ One can start Jonesy in two modes:
 
 ### External Readers Connection
 
-To use Jonesy, one should connect an external application to Jonesy's feeds. Suppose you have only one feed in your config file:
+To use Jonesy, one should connect an external application to Jonesy's feeds. Suppose one have only one feed in your config file:
 
 ```xml
 <feed source="http://example.org/rss" result="news.feed" />
@@ -63,17 +63,22 @@ This URL provides a single-entry feed which should be placed at the top of exter
 
 ## Configuration
 
+Jonesy is a simple application and thus relies only on environment variables and feeds list in Muon file.
+
 ### Environment Variables
 
-  - `$JONESY_HOME` — alternative directory for configuration file and retrieved feeds. It's assumed as `$XDG_CONFIG_HOME/jonesy` if XDG variables are set.
+  - `$JONESY_HOME` — directory for feeds list and retrieved items. If `$XDG_CONFIG_HOME` is defined, then it will be assumed as `$XDG_CONFIG_HOME/jonesy`, or `~/.jonesy` otherwise.
+  - `$JONESY_HOST` — address on which Jonesy will host local feeds, 127.0.0.1 by default.
+  - `$JONESY_PORT` — port, 8600 by default
+  - `$JONESY_USERAGENT` — "Browser" user agent string. By default Jonesy is trying to disguise itself as a Firefox, so feeds web servers will treat it as a human user.
+  - `$JONESY_THREADS` — number of threads which will fetch feed items, 4 by default.
 
 ### Files and Directories
 
   - `$JONESY_HOME/feeds.muon` — file for feeds list (see note below).
-  - `$JONESY_HOME/config.ini` — file for configuration.
   - `$JONESY_HOME/feeds` — directory for retrieved feeds files.
 
-*Note:* Muon specs are currently in early development and available [here](https://github.com/icmx/muon).
+*Note:* Muon specification is currently in early development and available [here](https://github.com/icmx/muon).
 
 #### Note for `&`s
 
@@ -105,9 +110,11 @@ In Muon feeds list (as well as other XML files) ampersands `&` must be replaced 
   - [x] Add timestamps to logging
   - [x] Add handling for web errors
   - [x] Make it multithreaded
-  - [ ] Remove config and its parsing
-  - [ ] Add `JONESY_THREADS` setting (number of threads used in fetch mode)
-  - [ ] Add `JONESY_MODE` setting (comptibility mode for OPML feeds list)
+  - [x] Remove config and its parsing
+  - [x] Add `JONESY_THREADS` setting (number of threads used in fetch mode)
+  - [ ] Rewrite utility classes
+  - [ ] Add parsing in multiple modes (for Muon and OPML)
+    - [ ] Add `JONESY_MODE` setting (comptibility mode for OPML feeds list)
   - [ ] Move to the Jonesy NG version
 
 ### For Jonesy NG
@@ -115,4 +122,3 @@ In Muon feeds list (as well as other XML files) ampersands `&` must be replaced 
   - [ ] Make it socket-based
   - [ ] Add basic web-interface
   - [ ] Design basic API
-  - [ ] Clean code style
