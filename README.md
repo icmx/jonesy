@@ -93,6 +93,8 @@ In Muon feeds list (as well as other XML files) ampersands `&` must be replaced 
 
 ## TODO
 
+### For Current
+
   - [x] Remove shell dependency
   - [x] Remove cURL dependency
     - [x] Replace curlrc by own config
@@ -102,7 +104,15 @@ In Muon feeds list (as well as other XML files) ampersands `&` must be replaced 
   - [x] Avoid `xml.dom` and try to use something other instead
   - [x] Add timestamps to logging
   - [x] Add handling for web errors
-  - [ ] Make it multithreaded (socket-based? what?)
-  - [ ] Add a basic web-interface
+  - [x] Make it multithreaded
+  - [ ] Remove config and its parsing
+  - [ ] Add `JONESY_THREADS` setting (number of threads used in fetch mode)
+  - [ ] Add `JONESY_MODE` setting (comptibility mode for OPML feeds list)
+  - [ ] Move to the Jonesy NG version
+
+### For Jonesy NG
+
+  - [ ] Make it socket-based
+  - [ ] Add basic web-interface
   - [ ] Design basic API
   - [ ] Clean code style
