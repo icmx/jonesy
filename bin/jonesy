@@ -158,7 +158,8 @@ class JonesyHTTPRequestHandler(BaseHTTPRequestHandler):
 
     def send_payload_file(self, path, content_type):
         try:
-            data = read(realpath(path), 'rb')
+            data = IO.read(realpath(path), 'rb')
+            print(data)
         except:
             self.send_headers_fail()
         else:
@@ -180,7 +181,7 @@ class JonesyHTTPRequestHandler(BaseHTTPRequestHandler):
             response = VIEW_FETCH.format(date=date)
             self.send_payload_string(response, 'application/xml')
         else:
-            response = join(HOME, self.path)
+            response = HOME + self.path
             self.send_payload_file(response, 'application/xml')
 
 
