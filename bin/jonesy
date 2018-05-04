@@ -18,7 +18,9 @@ PORT      = None
 HOME      = None
 USERAGENT = None
 THREADS   = None
+MODE      = None
 
+# Templates
 VIEW_FETCH = '''<?xml version="1.0" encoding="utf-8"?>
     <feed xmlns="http://www.w3.org/2005/Atom">
         <title>Jonesy Bumper Feed</title>
@@ -86,51 +88,71 @@ VIEW_INDEX = '''<!doctype html>
 '''
 
 
-class IO():
-    def read(path, mode):
-        file = open(path, mode)
-        data = file.read()
-        file.close()
-        return data
+# Input/Output Utilities
+def io_read(path, mode):
+    file = open(path, mode)
+    data = file.read()
+    file.close()
+    return data
 
-    def write(path, mode, data):
-        file = open(path, mode)
-        file.write(data)
-        file.close()
+def io_write(path, mode, data):
+    file = open(path, mode)
+    file.write(data)
+    file.close()
 
-    def fetch(source, output):
-        request = Request(source, headers={'User-Agent': USERAGENT})
+def io_fetch(source, output):
+    request = Request(source, headers={ 'User-Agent': USERAGENT })
+    sh_log('{0}: accessing ...'.format(source))
 
-        try:
-            Sh.log('{0}: accessing ...'.format(source))
-            response = urlopen(request)
-            data = response.read()
-            Sh.log('{0}: saving to {1} ...'.format(source, output))
-            IO.write(join(HOME, 'feeds', output), 'wb', data)
-        except Exception as exception:
-            Sh.log('{0}: exception: {1}'.format(source, exception))
-        else:
-            Sh.log('{0}: ok.'.format(source))
+    try:
+        response = urlopen(request)
+        data     = response.read()
+        sh_log('{0}: saving to {1} ...'.format(source, output))
+        io_write(join(HOME, 'feeds', output), 'wb', data)
+    except Exception as exception:
+        sh_log('{0}: exception: {1}'.format(source, exception))
+    else:
+        sh_log('{0}: ok.'.format(source))
 
 
-class Sh():
-    def timestamp():
-        return datetime.now().replace(microsecond=0).isoformat()
+# Shell Utilities
+def sh_timestamp():
+    return datetime.now().replace(microsecond=0).isoformat()
 
-    def log(message):
-        timestamp = Sh.timestamp()
-        print('jonesy: {0}: {1}'.format(timestamp, message))
+def sh_log(message):
+    timestamp = sh_timestamp()
+    print('jonesy: {0}: {1}'.format(timestamp, message))
 
-    def get(key, value=None):
-        return environ.get(key, value)
+def sh_getenv(key, value=None):
+    return environ.get(key, value)
 
-    def getstr(key, value=None):
-        return Sh.get(key, value)
+def sh_getstr(key, value=None):
+    return sh_getenv(key, value)
 
-    def getint(key, value=None):
-        return int(Sh.getstr(key, value))
+def sh_getint(key, value=None):
+    return int(sh_getenv(key, value))
 
-class JonesyFetchThread(Thread):
+
+# XML Utilities
+def xml_get_opml(path):
+    feeds = ElementTree.parse(path)
+
+    for feed in feeds.iter('outline'):
+        source = feed.get('xmlUrl')
+        output = feed.get('text')
+        yield (source, output)
+
+def xml_get_muon(path):
+    feeds = ElementTree.parse(path)
+
+    for feed in feeds.iter('feed'):
+        if feed.get('enabled') != 'false':
+            source = feed.get('source')
+            output = feed.get('output')
+            yield (source, output)
+
+
+class JonesyFetchWorker(Thread):
     def __init__(self, queue):
         Thread.__init__(self)
         self.queue = queue
@@ -138,11 +160,10 @@ class JonesyFetchThread(Thread):
     def run(self):
         while True:
             source, output = self.queue.get()
-            IO.fetch(source, output)
+            io_fetch(source, output)
             self.queue.task_done()
 
-
-class JonesyHTTPRequestHandler(BaseHTTPRequestHandler):
+class JonesyRequestHandler(BaseHTTPRequestHandler):
     def send_headers_ok(self, content_type):
         self.send_response(200)
         self.send_header('Content-Type', content_type)
@@ -158,8 +179,7 @@ class JonesyHTTPRequestHandler(BaseHTTPRequestHandler):
 
     def send_payload_file(self, path, content_type):
         try:
-            data = IO.read(realpath(path), 'rb')
-            print(data)
+            data = io_read(realpath(path), 'rb')
         except:
             self.send_headers_fail()
         else:
@@ -170,16 +190,19 @@ class JonesyHTTPRequestHandler(BaseHTTPRequestHandler):
         pass
 
     def do_GET(self):
-        Sh.log('accessing to path {0}'.format(self.path))
+        sh_log('accessing to path {0}'.format(self.path))
 
         if   self.path == '/':
             response = VIEW_INDEX.format(host=HOST, port=PORT)
             self.send_payload_string(response, 'text/html')
         elif self.path == '/fetch':
             do_mode_fetch()
-            date = Sh.timestamp()
+            date = sh_timestamp()
             response = VIEW_FETCH.format(date=date)
             self.send_payload_string(response, 'application/xml')
+        elif self.path == '/feeds':
+            response = HOME + self.path + '.' + MODE
+            self.send_payload_file(response, 'application/xml')
         else:
             response = HOME + self.path
             self.send_payload_file(response, 'application/xml')
@@ -187,32 +210,34 @@ class JonesyHTTPRequestHandler(BaseHTTPRequestHandler):
 
 def do_mode_fetch():
     queue = Queue()
-    feeds = ElementTree.parse(join(HOME + '/feeds.muon'))
+
+    if   MODE == 'muon':
+        feeds = [i for i in xml_get_muon(join(HOME, 'feeds.muon'))]
+    elif MODE == 'opml':
+        feeds = [i for i in xml_get_opml(join(HOME, 'feeds.opml'))]
 
     for i in range(THREADS):
-        worker = JonesyFetchThread(queue)
+        worker = JonesyFetchWorker(queue)
         worker.daemon = True
         worker.start()
 
-    for feed in feeds.iter('feed'):
-        if feed.get('enabled') != 'false':
-            source = feed.get('source')
-            output = feed.get('output')
-            queue.put((source, output))
+    for feed in feeds:
+        queue.put(feed)
 
     queue.join()
 
 
 def do_mode_serve():
-    Sh.log('starting at http://{0}:{1} ...'.format(HOST, PORT))
+    sh_log('starting at http://{0}:{1} ...'.format(HOST, PORT))
 
     try:
-        server = HTTPServer((HOST, PORT), JonesyHTTPRequestHandler)
+        server = HTTPServer((HOST, PORT), JonesyRequestHandler)
         server.serve_forever()
     except Exception as exception:
-        Sh.log('unable to start: {0}'.format(exception))
+        sh_log('unable to start: {0}'.format(exception))
     else:
-        Sh.log('serving, press Ctrl+C to stop.')
+        sh_log('serving, press Ctrl+C to stop.')
+
 
 def main():
     if   len(argv) == 1:
@@ -221,19 +246,23 @@ def main():
         do_mode_serve()
     elif argv[1]   == 'fetch':
         do_mode_fetch()
+    elif argv[1]   == 'setup':
+        do_mode_setup()
     else:
         print('{0}: unknown mode. Exiting.'.format(argv[1]))
 
-if __name__ == '__main__':
-    HOME      = Sh.getstr('HOME')
-    HOME      = Sh.getstr('XDG_CONFIG_HOME', join(HOME + '.jonesy'))
-    HOME      = Sh.getstr('JONESY_HOME',     join(HOME + '/jonesy'))
 
-    HOST      = Sh.getstr('JONESY_HOST',      '127.0.0.1')
-    PORT      = Sh.getint('JONESY_PORT',      '8600')
-    USERAGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:59.0) ' +\
-                'Gecko/20100101 Firefox/59.0'
-    USERAGENT = Sh.getstr('JONESY_USERAGENT', USERAGENT)
-    THREADS   = Sh.getint('JONESY_THREADS',   '4')
+if __name__ == '__main__':
+    HOME      = sh_getstr('HOME')
+    HOME      = sh_getstr('XDG_CONFIG_HOME',  join(HOME + '.jonesy'))
+    HOME      = sh_getstr('JONESY_HOME',      join(HOME + '/jonesy'))
+
+    HOST      = sh_getstr('JONESY_HOST',      '127.0.0.1')
+    PORT      = sh_getint('JONESY_PORT',      '8600')
+    USERAGENT = sh_getstr('JONESY_USERAGENT', 'Mozilla/5.0 (Windows ' +\
+                                              'NT 10.0; Win64; x64; ' +\
+                                              'rv:59.0) ')
+    THREADS   = sh_getint('JONESY_THREADS',   '4')
+    MODE      = sh_getstr('JONESY_MODE',      'muon')
 
     main()
