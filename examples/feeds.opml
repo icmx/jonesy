@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<opml version="2.0">
+  <!--
+    This is an example of Jonesy feeds list file.
+    It should be placed in $JONESY_HOME/feeds.opml.
+
+    If you want to use OPML files, you have to set $JONESY_MODE
+    environment variable to "opml".
+
+    See README.md for more.
+  -->
+  <head>
+  </head>
+  <body>
+    <outline xmlUrl="https://news.ycombinator.com/rss" text="hackernews.feed" />
+    <outline xmlUrl="https://blog.mozilla.org/feed" text="mozilla.feed" />
+    <outline xmlUrl="https://www.reddit.com/r/linux/.rss" text="reddit-linux.feed" />
+    <outline xmlUrl="https://github.com/curl/curl/commits.atom" text="github-curl.feed" />
+  </body>
+</muon>
