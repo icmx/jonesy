@@ -9,7 +9,7 @@ One should consider that Jonesy is more of an idea than real software which is a
 Jonesy depends only on Python 3 and its standard components. All you need is just get latest version from git repository:
 
 ```sh
-git clone "https://github.com/icmx/jonesy" "local-copy"
+  git clone "https://github.com/icmx/jonesy" "local-copy"
 ```
 
 Then make the following:
@@ -21,7 +21,7 @@ mkdir -p $XDG_CONFIG_HOME/jonesy/feeds
 cp       examples/feeds.muon $XDG_CONFIG_HOME/jonesy/
 ```
 
-Jonesy assumes that you have [XDG base directories](https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html) defined in environment variables. If such variables aren't set, it will use ~/.jonesy as a fallback.
+Jonesy assumes that you have [XDG base directories](https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html) defined in environment variables. If such variables aren't set, it will use *~/.jonesy* as a fallback.
 
 ## Usage
 
@@ -97,8 +97,8 @@ http://example.org/get?news&type=rss"
 Your feeds list (as well as other XML files) should avoid ampersands and replace them by special escape sequence `&amp;`, like so:
 
 ```xml
-<feed source="http://example.org/get?news&amp;type=rss"" result="news.feed" />
-<!--                                     ^^^^^ here                        -->
+<feed source="http://example.org/get?news&amp;type=rss" result="news.feed" />
+<!--                                     ^^^^^ here                       -->
 ```
 
 ## TODO
@@ -120,10 +120,14 @@ Your feeds list (as well as other XML files) should avoid ampersands and replace
   - [x] Rewrite utility classes
   - [x] Add parsing in multiple modes (for Muon and OPML)
     - [x] Add `JONESY_MODE` setting (comptibility mode for OPML feeds list)
+  - [ ] Add basic sanitizer functions (e.g. image to base64)
+  - [ ] Rewrite dirty sections
   - [ ] Move to the Jonesy NG version
 
 ### For Jonesy NG
 
   - [ ] Make it socket-based
   - [ ] Add basic web-interface
+    - [ ] Static page
+    - [ ] Javascript JSON parsers and page builders
   - [ ] Design basic API
