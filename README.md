@@ -91,14 +91,14 @@ Some feeds URLs contains ampersand characters `&`, for instance:
 
 ```
 http://example.org/get?news&type=rss"
-                           ^ here
+                           ^ this
 ```
 
 Your feeds list (as well as other XML files) should avoid ampersands and replace them by special escape sequence `&amp;`, like so:
 
 ```xml
 <feed source="http://example.org/get?news&amp;type=rss" result="news.feed" />
-<!--                                     ^^^^^ here                       -->
+<!--                                     ^^^^^ this                       -->
 ```
 
 ## TODO
@@ -116,17 +116,17 @@ Your feeds list (as well as other XML files) should avoid ampersands and replace
   - [x] Add handling for web errors
   - [x] Make it multithreaded
   - [x] Remove config and its parsing
-  - [x] Add `JONESY_THREADS` setting (number of threads used in fetch mode)
+  - [x] Add `$JONESY_THREADS` setting (number of threads used in fetch mode)
   - [x] Rewrite utility classes
   - [x] Add parsing in multiple modes (for Muon and OPML)
-    - [x] Add `JONESY_MODE` setting (comptibility mode for OPML feeds list)
-  - [ ] Add basic sanitizer functions (e.g. image to base64)
+    - [x] Add `$JONESY_MODE` setting (comptibility mode for OPML feeds list)
   - [ ] Rewrite dirty sections
   - [ ] Move to the Jonesy NG version
 
 ### For Jonesy NG
 
   - [ ] Make it socket-based
+  - [ ] Add basic sanitizer functions (e.g. image to base64)
   - [ ] Add basic web-interface
     - [ ] Static page
     - [ ] Javascript JSON parsers and page builders

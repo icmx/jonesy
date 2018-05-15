@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # This is an example of Jonesy updater script.
-# It can be used if you unable to use jobs scheduler like Cron.
+# It can be used if you're unable to use jobs scheduler like Cron.
 # See README.md for more.
 
 echo "Press Ctrl + C to stop."
