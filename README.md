@@ -9,7 +9,7 @@ One should consider that Jonesy is more of an idea than real software which is a
 Jonesy depends only on Python 3 and its standard components. All you need is just get latest version from git repository:
 
 ```sh
-  git clone "https://github.com/icmx/jonesy" "local-copy"
+git clone "https://github.com/icmx/jonesy" "local-copy"
 ```
 
 Then make the following:
@@ -121,6 +121,8 @@ Your feeds list (as well as other XML files) should avoid ampersands and replace
   - [x] Add parsing in multiple modes (for Muon and OPML)
     - [x] Add `$JONESY_MODE` setting (comptibility mode for OPML feeds list)
   - [ ] Rewrite dirty sections
+  - [ ] Add 404 page (for not existing feeds e.g.)
+  - [ ] Add optional feeds listing
   - [ ] Move to the Jonesy NG version
 
 ### For Jonesy NG
