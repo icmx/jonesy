@@ -120,9 +120,10 @@ Your feeds list (as well as other XML files) should avoid ampersands and replace
   - [x] Rewrite utility classes
   - [x] Add parsing in multiple modes (for Muon and OPML)
     - [x] Add `$JONESY_MODE` setting (comptibility mode for OPML feeds list)
-  - [ ] Rewrite dirty sections
   - [ ] Add 404 page (for not existing feeds e.g.)
   - [ ] Add optional feeds listing
+  - [ ] Add first-launch self-configuration
+  - [ ] Rewrite dirty sections
   - [ ] Move to the Jonesy NG version
 
 ### For Jonesy NG
